@@ -11,8 +11,8 @@ from tflearn.layers.estimator import regression
 
 class snakeApp:
     # initialise snake parameters
-    dply_wdth = 550
-    dply_hght = 550
+    dply_wdth = 500
+    dply_hght = 500
     black = (0, 0, 0)
     white = (255, 255, 255)
     red = (255, 0, 0)
@@ -24,11 +24,21 @@ class snakeApp:
     #apple_pos = [random.randrange(1, 50)*10, random.randrange(1, 50)*10]
     score = 0
     apple_img = pygame.image.load('apple.jpg')
-    #bttn_dir = 0
+
+    # deploy the snake
+    def dply_snk(self, snk_pos):
+        for position in self.snk_pos:
+            pygame.draw.rect(self.dply, self.green,
+                             pygame.Rect(position[0],
+                                         position[1], 10, 10))
+
+    # deploy the apple
+    def dply_apple(self, apple_pos, apple_img):
+        self.dply.blit(self.apple_img, (self.apple_pos[0], self.apple_pos[1]))
 
     def starting_positions(self):
         self.snk_hd = [100, 100]
-        self.snk_pos = [[100, 100], [90, 100], [80, 100]]
+        self.snk_pos = [self.snk_hd, [90, 100], [80, 100]]
         self.apple_pos = [random.randrange(1, 50)*10, random.randrange(1, 50)*10]
         self.score = 3
 
@@ -42,8 +52,8 @@ class snakeApp:
 
     # upon collision with game window edge
     def cllson_wth_edges(self, snk_hd):
-        if self.snk_hd[0] >= self.dply_hght or self.snk_hd[0] \
-                <= 0 or self.snk_hd[1] >= self.dply_hght or self.snk_hd[1] <= 0:
+        if self.snk_hd[0] >= 500 or self.snk_hd[0] \
+                <= 0 or self.snk_hd[1] >= 500 or self.snk_hd[1] <= 0:
             return 1
         else:
             return 0
@@ -51,7 +61,7 @@ class snakeApp:
     # upon snake collision with itself
     def cllson_wth_snk(self, snk_pos):
         self.snk_hd = self.snk_pos[0]
-        if self.snk_hd in self.snk_pos[2:]:
+        if self.snk_hd in self.snk_pos[1:]:
             return 1
         else:
             return 0
@@ -76,17 +86,6 @@ class snakeApp:
             return 1
         else:
             return 0
-
-    # deploy the snake
-    def dply_snk(self, snk_pos):
-        for position in self.snk_pos:
-            pygame.draw.rect(self.dply, self.green,
-                             pygame.Rect(position[0],
-                                         position[1], 10, 10))
-
-    # deploy the apple
-    def dply_apple(self, apple_pos, apple_img):
-        self.dply.blit(self.apple_img, (self.apple_pos[0], self.apple_pos[1]))
 
     # distance of the apple from the snake
     def apple_dstnc_snk(self, apple_pos, snk_pos):
@@ -124,11 +123,14 @@ class snakeApp:
         else:
             self.direction = 0
 
+        # print(self.direction)
+
         self.crrnt_drctn_vctr = np.array(self.snk_pos[0]) - np.array(self.snk_pos[1])
         self.lft_drctn_vctr = np.array([self.crrnt_drctn_vctr[1], -self.crrnt_drctn_vctr[0]])
         self.rght_drctn_vctr = np.array([-self.crrnt_drctn_vctr[1], self.crrnt_drctn_vctr[0]])
 
         self.nxt_drctn = self.crrnt_drctn_vctr
+        # print(self.nxt_drctn)
         if self.direction == -1:
             self.nxt_drctn = self.lft_drctn_vctr
         if self.direction == 1:
@@ -149,15 +151,16 @@ class snakeApp:
             self.bttn_dir = 2
         else:
             self.bttn_dir = 3
-        print(self.nxt_drctn.tolist())
+
         return self.bttn_dir
 
     # generate angle with apple for training
     def apple_ang(self, snk_pos, apple_pos):
-        # print(self.snk_pos)
+        print(self.snk_pos)
         # print(self.apple_pos)
-        self.apple_drctn = np.array(self.apple_pos) - np.array(self.snk_pos[0])
-        self.snk_drctn = np.array(self.snk_pos[0]) - np.array(self.snk_pos[1])
+        self.apple_drctn = np.array(self.apple_pos)-np.array(self.snk_pos[0])
+        self.snk_drctn = np.array(self.snk_pos[0])-np.array(self.snk_pos[1])
+        print(self.snk_drctn)
 
         # normalise the snake and apple direction vectors
         self.norm_apple_drctn = np.linalg.norm(self.apple_drctn)
@@ -175,6 +178,7 @@ class snakeApp:
                                 self.nrmlsd_apple[0] * self.nrmlsd_snk[1],
                                 self.nrmlsd_apple[1] * self.nrmlsd_snk[1] +
                                 self.nrmlsd_apple[0] * self.nrmlsd_snk[0]) / math.pi
+        # print(self.angle)
         return self.angle
 
     # main game loop
@@ -199,7 +203,7 @@ class snakeApp:
                     else:
                         self.bttn_dir = self.bttn_dir"""
             self.dply.fill(self.wndw_clr)
-            self.dply_apple(self.dply, self.apple_pos)
+            self.dply_apple(self.apple_img, self.apple_pos)
             self.dply_snk(self.snk_pos)
 
             self.snk_pos, self.apple_pos, self.score = self.gnrt_snk(self.snk_hd,
@@ -249,7 +253,7 @@ class snakeApp:
                     self.prv_apple_dtnc = self.crrnt_snk_dstnc
                     self.prev_score = self.score
 
-        return self.trng_data_x, self.trng_data_y
+            return self.trng_data_x, self.trng_data_y
 
     def game_wth_NN(self, model):
         self.max_scr = 3

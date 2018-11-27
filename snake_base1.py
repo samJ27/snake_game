@@ -99,7 +99,7 @@ def is_direction_blocked(snake_position, current_direction_vector):
 
 def generate_next_direction(snake_position, angle_with_apple):
     direction = 0
-    print(angle_with_apple)
+    # print(angle_with_apple)
     if angle_with_apple > 0:
         direction = 1
     elif angle_with_apple < 0:
@@ -137,9 +137,10 @@ def generate_button_direction(new_direction):
 
 
 def angle_with_apple(snake_position, apple_position):
+    print(snake_position)
     apple_direction_vector = np.array(apple_position)-np.array(snake_position[0])
     snake_direction_vector = np.array(snake_position[0])-np.array(snake_position[1])
-
+    print(snake_direction_vector)
     norm_of_apple_direction_vector = np.linalg.norm(apple_direction_vector)
     norm_of_snake_direction_vector = np.linalg.norm(snake_direction_vector)
     if norm_of_apple_direction_vector == 0:
@@ -281,6 +282,7 @@ UP -> button_direction = 3
 '''
 training_data_x, training_data_y = generate_training_data()
 model = train_model()
+print(training_data_x)
 model.fit(np.array(training_data_x).reshape(-1, 5, 1),
           np.array(training_data_y).reshape(-1, 1), n_epoch=3, shuffle=True)
 max_score, avg_score = run_game_with_ML(model)
